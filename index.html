@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday Website Creator</title>
+  <style>
+    :root {
+      --primary: #ff758c;
+      --secondary: #ff7eb3;
+      --bg: #fff0f5;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', cursive, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ffe6ea 0%, #e8f4f8 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .form-container {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 117, 140, 0.2);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      border: 3px dashed #ffb6c1;
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input[type="text"], input[type="date"], input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ffd1dc;
+      border-radius: 12px;
+      outline: none;
+      font-size: 1rem;
+      background: #fffafa;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-submit {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 117, 140, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h1>🎉 Create Sister's Wish Website 🎂</h1>
+    <div class="form-group">
+      <label for="sisterName">Sister's Name:</label>
+      <input type="text" id="sisterName" placeholder="Enter her name..." required />
+    </div>
+    <div class="form-group">
+      <label for="birthDate">Select Her Birthday Date:</label>
+      <input type="date" id="birthDate" required />
+    </div>
+    <div class="form-group">
+      <label for="photoUpload">Upload Her Photos (Select multiple):</label>
+      <input type="file" id="photoUpload" accept="image/*" multiple />
+    </div>
+    <button class="btn-submit" onclick="generateAndOpenWebsite()">✨ Generate & Open in New Tab ✨</button>
+  </div>
+
+  <script>
+    function generateAndOpenWebsite() {
+      const name = document.getElementById('sisterName').value.trim() || "Sister";
+      const birthDateVal = document.getElementById('birthDate').value;
+      const fileInput = document.getElementById('photoUpload');
+      const files = Array.from(fileInput.files);
+
+      const dateObj = birthDateVal ? new Date(birthDateVal) : new Date('2010-10-29');
+      const month = dateObj.getMonth() + 1;
+      const day = dateObj.getDate();
+
+      let formattedDateStr = "29-10-2010";
+      if (birthDateVal) {
+        const parts = birthDateVal.split('-');
+        if (parts.length === 3) {
+          formattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+      }
+
+      if (files.length === 0) {
+        const defaultPhotos = [
+          'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800',
+          'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800',
+          'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800'
+        ];
+        openTab(name, month, day, birthDateVal, formattedDateStr, defaultPhotos);
+      } else {
+        const photoUrls = [];
+        let loadedCount = 0;
+
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            photoUrls.push(e.target.result);
+            loadedCount++;
+            if (loadedCount === files.length) {
+              openTab(name, month, day, birthDateVal, formattedDateStr, photoUrls);
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    function openTab(name, month, day, rawDateStr, formattedDateStr, photos) {
+      const newWin = window.open("", "_blank");
+      
+      const timelineHtml = photos.map((src, idx) => `
+        <div class="timeline-item" onclick="openPhotoModal('${src}', ${idx + 1})">
+          <div class="timeline-badge">${idx + 1}</div>
+          <div class="timeline-content heartbeat-hover">
+            <div class="stetho-glow-ring"></div>
+            <img src="${src}" alt="Memory ${idx + 1}" />
+            <p>❤️ Future Dr. ${name} - Milestone #${idx + 1}</p>
+            <small style="font-size: 0.8rem;">(Click to view full screen ✨)</small>
+          </div>
+        </div>
+      `).join('');
+
+      const content = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Happy Birthday Dr. ${name}!</title>
+          <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"><\/script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+          <style>
+            :root {
+              --primary: #ff758c;
+              --accent: #feca57;
+              --bg: #fff0f3;
+              --card-bg: rgba(255, 255, 255, 0.92);
+              --text-color: #2d3436;
+              --card-text: #2d3436;
+              --sub-text: #555555;
+              --box-bg: #f8f9fa;
+            }
+
+            body.dark-mode {
+              --bg: #12121e;
+              --card-bg: rgba(26, 26, 44, 0.92);
+              --text-color: #ffffff;
+              --card-text: #f5f5f7;
+              --sub-text: #cccccc;
+              --box-bg: #252538;
+            }
+
+            * {
+              box-sizing: border-box;
+              margin: 0;
+              padding: 0;
+              font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            }
+
+            body {
+              background-color: var(--bg);
+              color: var(--text-color);
+              text-align: center;
+              overflow-x: hidden;
+              position: relative;
+              min-height: 100vh;
+              padding-bottom: 50px;
+              transition: background-color 0.4s ease, color 0.4s ease;
+            }
+
+            .theme-toggle {
+              position: fixed;
+              top: 15px;
+              right: 15px;
+              z-index: 100;
+              background: #ff758c;
+              color: white;
+              border: none;
+              padding: 10px 18px;
+              border-radius: 20px;
+              cursor: pointer;
+              font-weight: bold;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+              transition: transform 0.2s;
+            }
+
+            .theme-toggle:hover {
+              transform: scale(1.05);
+            }
+
+            .sticker {
+              position: fixed;
+              font-size: 2.2rem;
+              z-index: 10;
+              pointer-events: none;
+              animation: float 4s ease-in-out infinite alternate;
+              filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+            }
+
+            @keyframes float {
+              0% { transform: translateY(0px) rotate(-5deg); }
+              100% { transform: translateY(-20px) rotate(5deg); }
+            }
+
+            .st-1 { top: 5%; left: 3%; animation-delay: 0s; }
+            .st-2 { top: 12%; right: 4%; animation-delay: 1s; }
+            .st-3 { top: 45%; left: 2%; animation-delay: 2s; }
+            .st-4 { top: 50%; right: 3%; animation-delay: 0.5s; }
+            .st-5 { bottom: 10%; left: 4%; animation-delay: 1.5s; }
+            .st-6 { bottom: 12%; right: 5%; animation-delay: 2.5s; }
+
+            header {
+              padding: 50px 20px 30px;
+              background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+              border-bottom-left-radius: 40px;
+              border-bottom-right-radius: 40px;
+              box-shadow: 0 8px 20px rgba(255, 154, 158, 0.3);
+              position: relative;
+            }
+
+            body.dark-mode header {
+              background: linear-gradient(135deg, #2d1f3d 0%, #5c2548 100%);
+            }
+
+            header h1 {
+              font-size: 2.8rem;
+              color: #ffffff;
+              text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+              margin-bottom: 10px;
+            }
+
+            header p {
+              color: #ffffff;
+              font-size: 1.3rem;
+              font-weight: bold;
+            }
+
+            .container {
+              max-width: 850px;
+              margin: 30px auto 0;
+              padding: 0 20px;
+            }
+
+            .card {
+              background: var(--card-bg);
+              color: var(--card-text);
+              backdrop-filter: blur(10px);
+              -webkit-backdrop-filter: blur(10px);
+              border-radius: 20px;
+              padding: 25px;
+              margin-bottom: 30px;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+              border: 3px solid #ffeaa7;
+              position: relative;
+              transition: background-color 0.4s ease, color 0.4s ease;
+            }
+
+            body.dark-mode .card {
+              border-color: #5c2548;
+            }
+
+            .doodle-header {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 15px;
+              margin-bottom: 15px;
+            }
+
+            .doodle-header h2 {
+              color: #e84393;
+            }
+
+            body.dark-mode .doodle-header h2 {
+              color: #ff7eb3;
+            }
+
+            /* --- COUNTDOWN TIMER --- */
+            .countdown-timer {
+              display: flex;
+              justify-content: center;
+              gap: 15px;
+              margin-top: 15px;
+              flex-wrap: wrap;
+            }
+
+            .time-unit {
+              background: #ffeaa7;
+              border: 2px solid #fdcb6e;
+              padding: 10px 15px;
+              border-radius: 12px;
+              min-width: 75px;
+              color: #2d3436;
+            }
+
+            .time-unit span {
+              display: block;
+              font-size: 1.5rem;
+              font-weight: bold;
+              color: #d63031;
+            }
+
+            .time-unit label {
+              font-size: 0.8rem;
+              color: #636e72;
+            }
+
+            /* --- CAKE & CANDLE & SLICE GAME --- */
+            .cake-container-box {
+              margin: 20px 0;
+              position: relative;
+            }
+
+            .cake-box {
+              cursor: pointer;
+              display: inline-block;
+              position: relative;
+            }
+
+            .candle {
+              font-size: 2.5rem;
+              transition: opacity 0.5s ease;
+            }
+
+            .candle.blown {
+              opacity: 0.3;
+              filter: grayscale(100%);
+            }
+
+            .cake-graphic {
+              font-size: 4rem;
+              margin-top: -10px;
+              transition: transform 0.4s ease;
+            }
+
+            .cake-graphic.sliced {
+              animation: sliceCut 0.6s ease forwards;
+            }
+
+            @keyframes sliceCut {
+              0% { transform: scale(1) rotate(0deg); }
+              50% { transform: scale(1.1) rotate(10deg); filter: drop-shadow(0 0 15px #ff758c); }
+              100% { transform: scale(1) rotate(0deg); }
+            }
+
+            .slice-btn {
+              display: none;
+              background: linear-gradient(45deg, #e84393, #ff758c);
+              color: white;
+              border: none;
+              padding: 10px 22px;
+              border-radius: 20px;
+              font-size: 1rem;
+              font-weight: bold;
+              cursor: pointer;
+              margin-top: 15px;
+              box-shadow: 0 4px 12px rgba(232, 67, 147, 0.4);
+            }
+
+            /* --- FLOATING STETHOSCOPE & HEARTBEAT HOVER EFFECT --- */
+            .heartbeat-hover {
+              position: relative;
+              transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .heartbeat-hover:hover {
+              animation: heartbeat 1.2s infinite ease-in-out;
+              box-shadow: 0 0 20px rgba(255, 117, 140, 0.6);
+              border-color: #ff758c !important;
+            }
+
+            @keyframes heartbeat {
+              0% { transform: scale(1); }
+              14% { transform: scale(1.03); }
+              28% { transform: scale(1); }
+              42% { transform: scale(1.03); }
+              70% { transform: scale(1); }
+            }
+
+            .stetho-glow-ring {
+              position: absolute;
+              top: -5px;
+              left: -5px;
+              right: -5px;
+              bottom: -5px;
+              border-radius: 15px;
+              border: 2px solid transparent;
+              pointer-events: none;
+              transition: border-color 0.3s ease;
+            }
+
+            .heartbeat-hover:hover .stetho-glow-ring {
+              border-color: #55efc4;
+              box-shadow: 0 0 12px #55efc4;
+            }
+
+            /* --- FLIP CARDS COMMON STYLING --- */
+            .flip-container {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+              gap: 20px;
+              margin-top: 15px;
+            }
+
+            .flip-card {
+              background-color: transparent;
+              height: 150px;
+              perspective: 1000px;
+              cursor: pointer;
+            }
+
+            .flip-card-inner {
+              position: relative;
+              width: 100%;
+              height: 100%;
+              text-align: center;
+              transition: transform 0.6s;
+              transform-style: preserve-3d;
+            }
+
+            .flip-card.flipped .flip-card-inner {
+              transform: rotateY(180deg);
+            }
+
+            .flip-card-front, .flip-card-back {
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              backface-visibility: hidden;
+              border-radius: 15px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 15px;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+            .flip-card-front {
+              background: linear-gradient(135deg, #a8edd8 0%, #fed6e3 100%);
+              color: #2d3436;
+              font-weight: bold;
+              font-size: 1.05rem;
+              border: 2px solid #55efc4;
+            }
+
+            body.dark-mode .flip-card-front {
+              background: linear-gradient(135deg, #2b584c 0%, #683a4d 100%);
+              color: #ffffff;
+              border-color: #00b894;
+            }
+
+            .flip-card-back {
+              background: #ffeaa7;
+              color: #d63031;
+              transform: rotateY(180deg);
+              border: 2px dashed #fdcb6e;
+              font-size: 0.95rem;
+              font-weight: bold;
+            }
+
+            .timeline {
+              position: relative;
+              margin: 20px 0;
+              padding-left: 30px;
+              border-left: 4px dashed #ff758c;
+              text-align: left;
+            }
+
+            .timeline-item {
+              position: relative;
+              margin-bottom: 25px;
+              cursor: pointer;
+            }
+
+            .timeline-badge {
+              position: absolute;
+              left: -48px;
+              top: 0;
+              background: #ff758c;
+              color: white;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: bold;
+            }
+
+            .timeline-content {
+              background: var(--box-bg);
+              color: var(--card-text);
+              padding: 12px;
+              border-radius: 15px;
+              border: 2px solid #fd79a8;
+              box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            }
+
+            .timeline-content img {
+              width: 100%;
+              max-height: 250px;
+              object-fit: cover;
+              border-radius: 10px;
+            }
+
+            .timeline-content p {
+              margin-top: 8px;
+              font-weight: bold;
+              color: #6c5ce7;
+            }
+
+            body.dark-mode .timeline-content p {
+              color: #a29bfe;
+            }
+
+            .quiz-question {
+              margin-bottom: 15px;
+              text-align: left;
+              background: var(--box-bg);
+              padding: 12px;
+              border-radius: 12px;
+            }
+
+            .quiz-btn {
+              background: #ffffff;
+              color: #2d3436;
+              border: 2px solid #ff758c;
+              padding: 8px 14px;
+              border-radius: 15px;
+              margin: 5px;
+              cursor: pointer;
+              font-weight: bold;
+              transition: all 0.2s;
+            }
+
+            .quiz-btn:hover {
+              background: #ff758c;
+              color: white;
+            }
+
+            .certificate-container {
+              border: 8px double #ff758c;
+              padding: 25px;
+              border-radius: 15px;
+              background: #fffafa;
+              color: #2d3436;
+              margin-top: 15px;
+            }
+
+            .fact-box {
+              background: var(--box-bg);
+              color: var(--card-text);
+              border-left: 5px solid #6c5ce7;
+              padding: 18px;
+              margin-top: 15px;
+              border-radius: 12px;
+              text-align: left;
+              line-height: 1.6;
+            }
+
+            .fact-image-container {
+              margin-top: 12px;
+              text-align: center;
+            }
+
+            .fact-img {
+              max-width: 100%;
+              max-height: 250px;
+              object-fit: cover;
+              border-radius: 12px;
+              border: 3px solid #ffeaa7;
+              cursor: pointer;
+            }
+
+            .quotes-list {
+              text-align: left;
+              margin-top: 15px;
+              padding: 0 15px;
+            }
+
+            .quote-item {
+              background: var(--box-bg);
+              color: var(--card-text);
+              border-left: 4px solid #ff758c;
+              padding: 12px 16px;
+              margin-bottom: 12px;
+              border-radius: 8px;
+              font-size: 1rem;
+            }
+
+            .btn {
+              background-color: var(--primary);
+              color: white;
+              border: none;
+              padding: 12px 28px;
+              font-size: 1.1rem;
+              border-radius: 25px;
+              cursor: pointer;
+              font-weight: bold;
+              box-shadow: 0 4px 10px rgba(255, 107, 129, 0.4);
+              transition: all 0.2s ease;
+              margin-top: 15px;
+            }
+
+            .btn:hover {
+              transform: scale(1.05);
+              background-color: #ff4757;
+            }
+
+            .surprise-box {
+              display: none;
+              margin-top: 20px;
+              padding: 20px;
+              background: #ffeaa7;
+              border-radius: 15px;
+              border: 2px dashed #fdcb6e;
+              font-size: 1.1rem;
+              color: #d63031;
+            }
+
+            .music-player {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+              background: #e17055;
+              color: white;
+              padding: 12px 20px;
+              border-radius: 30px;
+              width: fit-content;
+              margin: 20px auto 0;
+            }
+
+            audio {
+              height: 30px;
+            }
+
+            .modal-overlay {
+              display: none;
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.85);
+              z-index: 1000;
+              justify-content: center;
+              align-items: center;
+              padding: 20px;
+              animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+
+            .modal-content {
+              position: relative;
+              background: #ffffff;
+              padding: 20px;
+              border-radius: 25px;
+              max-width: 600px;
+              width: 90%;
+              box-shadow: 0 10px 30px rgba(255, 107, 129, 0.5);
+              border: 5px solid #ff7eb3;
+              text-align: center;
+              color: #2d3436;
+            }
+
+            .modal-img-container {
+              position: relative;
+              display: inline-block;
+              width: 100%;
+            }
+
+            .modal-content img {
+              width: 100%;
+              max-height: 60vh;
+              object-fit: contain;
+              border-radius: 15px;
+              border: 3px solid #ffeaa7;
+            }
+
+            .modal-sticker {
+              position: absolute;
+              font-size: 2.8rem;
+              filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+            }
+
+            .modal-sticker.top-left { top: -20px; left: -20px; }
+            .modal-sticker.top-right { top: -20px; right: -20px; }
+            .modal-sticker.bottom-left { bottom: 10px; left: -15px; }
+            .modal-sticker.bottom-right { bottom: 10px; right: -15px; }
+
+            .modal-caption {
+              margin-top: 15px;
+              font-size: 1.2rem;
+              font-weight: bold;
+              color: #e84393;
+              border-top: 2px dashed #ffb6c1;
+              padding-top: 12px;
+            }
+
+            .close-btn {
+              position: absolute;
+              top: -15px;
+              right: -15px;
+              background: #ff4757;
+              color: white;
+              border: none;
+              font-size: 1.3rem;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              cursor: pointer;
+              font-weight: bold;
+            }
+          </style>
+        </head>
+        <body>
+
+          <button class="theme-toggle" onclick="toggleTheme()">🌙 Switch Theme</button>
+
+          <div class="sticker st-1">🩺🎂</div>
+          <div class="sticker st-2">👩‍⚕️💖</div>
+          <div class="sticker st-3">💊✨</div>
+          <div class="sticker st-4">💉🍰</div>
+          <div class="sticker st-5">🎁🩺</div>
+          <div class="sticker st-6">🧸🩺</div>
+
+          <header>
+            <h1>🎉 Happy Birthday, Dr. ${name}! 🩺🥳</h1>
+            <p>To the most hardworking & compassionate future doctor in the world! ✨</p>
+
+            <div class="music-player">
+              🎵 <span>Play Birthday Song:</span>
+              <audio id="bdayAudio" controls loop>
+                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                Your browser does not support audio playback.
+              </audio>
+            </div>
+          </header>
+
+          <div class="container">
+
+            <!-- Life Timer Card -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>⏰</span>
+                <h2>Life Journey Timer</h2>
+                <span>🎉</span>
+              </div>
+              <p>Celebrating every beautiful moment since your birth on <strong>${formattedDateStr}</strong>!</p>
+              <div class="countdown-timer">
+                <div class="time-unit"><span id="years">00</span><label>Years</label></div>
+                <div class="time-unit"><span id="days">00</span><label>Days</label></div>
+                <div class="time-unit"><span id="hours">00</span><label>Hours</label></div>
+                <div class="time-unit"><span id="minutes">00</span><label>Minutes</label></div>
+              </div>
+            </div>
+
+            <!-- Candle & Virtual Cake Slicing Card -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>🎂</span>
+                <h2>Make a Wish & Blow the Candles!</h2>
+                <span>🕯️</span>
+              </div>
+              <div class="cake-container-box">
+                <div class="cake-box" onclick="blowCandles()">
+                  <div id="candleFlames">
+                    <span class="candle">🔥</span>
+                    <span class="candle">🔥</span>
+                    <span class="candle">🔥</span>
+                  </div>
+                  <div id="cakeGraphic" class="cake-graphic">🎂</div>
+                </div>
+              </div>
+              <p id="cakeStatus" style="font-weight: bold; color: #e84393;">👇 Tap on the cake candles to blow them out and play the song!</p>
+              <button id="sliceBtn" class="slice-btn" onclick="sliceCake()">🍰 Slice the Cake & Treat Yourself!</button>
+            </div>
+
+            <!-- Medical Scratch & Flip Badges Section -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>🩺</span>
+                <h2>Interactive MBBS Badges & Reveal Cards</h2>
+                <span>🎁</span>
+              </div>
+              <p style="font-size: 0.9rem; margin-bottom: 10px;">👇 Click each badge to reveal secret medical perks (click again to flip back)!</p>
+              <div class="flip-container">
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                  <div class="flip-card-inner">
+                    <div class="flip-card-front">🩺 Tap to Reveal Badge #1</div>
+                    <div class="flip-card-back">🩺 NEET Clearance Badge: Master of Medical Concepts!</div>
+                  </div>
+                </div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                  <div class="flip-card-inner">
+                    <div class="flip-card-front">💊 Tap to Reveal Badge #2</div>
+                    <div class="flip-card-back">💊 Prescription: 100% Pass in Anatomy & Physiology!</div>
+                  </div>
+                </div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                  <div class="flip-card-inner">
+                    <div class="flip-card-front">☕ Tap to Reveal Badge #3</div>
+                    <div class="flip-card-back">☕ Coffee Power: Unlimited caffeine boost for study nights!</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sister Quiz Section -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>❓</span>
+                <h2>How Well Do You Know Dr. ${name}?</h2>
+                <span>🎓</span>
+              </div>
+              <div class="quiz-question">
+                <p><strong>1. What is her ultimate study superpower?</strong></p>
+                <button class="quiz-btn" onclick="answerQuiz(this, true)">Infinite Coffee & Focus ☕</button>
+                <button class="quiz-btn" onclick="answerQuiz(this, false)">Power Naps 😴</button>
+              </div>
+              <div class="quiz-question">
+                <p><strong>2. What happens on her birthday?</strong></p>
+                <button class="quiz-btn" onclick="answerQuiz(this, true)">Zero Stress & Unlimited Cake 🎂</button>
+                <button class="quiz-btn" onclick="answerQuiz(this, false)">Reading Medical Textbooks 📚</button>
+              </div>
+              <div id="quizResult" style="font-weight: bold; color: #e84393; margin-top: 10px;"></div>
+            </div>
+
+            <!-- Downloadable Certificate Card -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>🏆</span>
+                <h2>Official Birthday Honor</h2>
+                <span>✨</span>
+              </div>
+              <div id="certArea" class="certificate-container">
+                <h2 style="color: #ff758c; font-size: 1.8rem;">CERTIFICATE OF EXCELLENCE</h2>
+                <p style="margin-top: 10px; font-size: 1.1rem;">This honor is proudly presented to:</p>
+                <h1 style="color: #e84393; margin: 15px 0;">Dr. ${name}</h1>
+                <p style="font-size: 1.05rem; line-height: 1.5;">For being the <strong>Most Caring Sister, Hardworking MBBS Student, and Future Doctor of the Year!</strong></p>
+              </div>
+              <button class="btn" onclick="downloadCertificate()">📥 Download Certificate</button>
+            </div>
+
+            <!-- Wishing Note Card -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>🩺</span>
+                <h2>Special Wishing Note</h2>
+                <span>👩‍⚕️</span>
+              </div>
+              <p style="font-size: 1.1rem; line-height: 1.6;">
+                Happy Birthday, Dr. ${name}! Choosing MBBS is no easy task, but your dedication, kindness, and passion shine through every single day. 
+                May this birthday give you a much-needed study break, lots of delicious cake, and endless happiness! 💖
+              </p>
+              <button class="btn" onclick="toggleSurprise()">Click for Prescription! 💊🎁</button>
+              <div id="surprise" class="surprise-box">
+                📋 <strong>Doctor's Prescription:</strong> 🎈<br/>
+                Take 1 full day off, consume unlimited cake, receive endless hugs, and enjoy zero stress! Rx valid forever! 🥳✨
+              </div>
+            </div>
+
+            <!-- History & Space Section -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>🌟</span>
+                <h2>On Your Birthday in History & Space</h2>
+                <span>🚀</span>
+              </div>
+              <div class="fact-box" id="worldEvents">
+                🌐 <strong>Inspiring World Event:</strong><br/>
+                <span id="historyText">Finding positive history highlights... ✨</span>
+                <div class="fact-image-container" id="historyImgBox" style="display:none;">
+                  <img id="historyImg" class="fact-img" src="" alt="Historical Event Photo" onclick="openCleanModal(this.src, '🌐 Inspiring World Event Highlight')" />
+                </div>
+              </div>
+
+              <div class="fact-box" id="spaceEvents" style="border-left-color: #e84393;">
+                🚀 <strong>Cosmic & Astronomical Event:</strong><br/>
+                <span id="spaceText">Discovering deep space imagery... 🌌</span>
+                <div class="fact-image-container" id="spaceImgBox" style="display:none;">
+                  <img id="spaceImg" class="fact-img" src="" alt="Space Discovery Photo" onclick="openCleanModal(this.src, '🚀 Cosmic & Deep Space Wonder')" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Flip Wish Cards Section -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>💌</span>
+                <h2>Messages from Loved Ones</h2>
+                <span>✨</span>
+              </div>
+              <p style="font-size: 0.9rem; margin-bottom: 10px;">👇 Click each card to flip and read secret birthday wishes!</p>
+              <div class="flip-container">
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                  <div class="flip-card-inner">
+                    <div class="flip-card-front">💖 From Family</div>
+                    <div class="flip-card-back">"We are so proud of you, Future Doctor! Keep shining bright!"</div>
+                  </div>
+                </div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                  <div class="flip-card-inner">
+                    <div class="flip-card-front">🩺 Study Buddy</div>
+                    <div class="flip-card-back">"Happy Birthday! May your stethoscope never leak and exams be easy!"</div>
+                  </div>
+                </div>
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                  <div class="flip-card-inner">
+                    <div class="flip-card-front">🎁 Best Friend</div>
+                    <div class="flip-card-back">"To the sweetest sister ever, wishing you a year full of joy and treats!"</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quotes Section -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>🩺</span>
+                <h2>Inspirational Doctor Quotes</h2>
+                <span>✨</span>
+              </div>
+              <div class="quotes-list">
+                <div class="quote-item">🩺 <em>"Wherever the art of Medicine is loved, there is also a love of Humanity."</em> — Hippocrates</div>
+                <div class="quote-item">👩‍⚕️ <em>"Behind every successful MBBS student is an endless cup of coffee and a heart full of healing dreams."</em></div>
+                <div class="quote-item">💊 <em>"The white coat isn't just a uniform; it's a promise to care, heal, and make the world a better place."</em></div>
+              </div>
+            </div>
+
+            <!-- Interactive Memory Timeline -->
+            <div class="card">
+              <div class="doodle-header">
+                <span>📸</span>
+                <h2>Memory Lane Timeline</h2>
+                <span>🩺</span>
+              </div>
+              <p style="font-size: 0.85rem; margin-bottom: 15px;">👇 Hover for stethoscope heartbeat effect & click to view full size!</p>
+              <div class="timeline">
+                ${timelineHtml}
+              </div>
+            </div>
+          </div>
+
+          <!-- MAXIMIZED PHOTO MODAL (WITH STICKERS) -->
+          <div id="photoModal" class="modal-overlay" onclick="closePhotoModal(event)">
+            <div class="modal-content">
+              <button class="close-btn" onclick="closeModalDirect()">✕</button>
+              <div class="modal-img-container">
+                <span class="modal-sticker top-left">🩺🎂</span>
+                <span class="modal-sticker top-right">👩‍⚕️💖</span>
+                <span class="modal-sticker bottom-left">💊✨</span>
+                <span class="modal-sticker bottom-right">🎁🩺</span>
+                <img id="modalImage" src="" alt="Maximized Memory" />
+              </div>
+              <div id="modalCaption" class="modal-caption"></div>
+            </div>
+          </div>
+
+          <!-- CLEAN MODAL FOR HISTORY & SPACE (NO STICKERS) -->
+          <div id="cleanModal" class="modal-overlay" onclick="closeCleanModal(event)">
+            <div class="modal-content">
+              <button class="close-btn" onclick="closeCleanModalDirect()">✕</button>
+              <div class="modal-img-container">
+                <img id="cleanModalImage" src="" alt="Maximized Event View" />
+              </div>
+              <div id="cleanModalCaption" class="modal-caption"></div>
+            </div>
+          </div>
+
+          <script>
+            window.addEventListener('load', () => {
+              if (typeof confetti === 'function') {
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+              }
+              fetchBirthdayHistory(${month}, ${day});
+              startLifeTimer("${rawDateStr}");
+            });
+
+            function toggleTheme() {
+              document.body.classList.toggle('dark-mode');
+              const btn = document.querySelector('.theme-toggle');
+              if (document.body.classList.contains('dark-mode')) {
+                btn.innerHTML = '☀️ Switch Light';
+              } else {
+                btn.innerHTML = '🌙 Switch Theme';
+              }
+            }
+
+            // --- RELIABLE WIKIPEDIA & SPACE DATA FETCH ---
+            async function fetchBirthdayHistory(m, d) {
+              const historyText = document.getElementById('historyText');
+              const historyImg = document.getElementById('historyImg');
+              const historyImgBox = document.getElementById('historyImgBox');
+
+              const spaceText = document.getElementById('spaceText');
+              const spaceImg = document.getElementById('spaceImg');
+              const spaceImgBox = document.getElementById('spaceImgBox');
+
+              try {
+                const res = await fetch(\`https://en.wikipedia.org/api/rest_v1/feed/onthisday/selected/\${m}/\${d}\`);
+                const data = await res.json();
+                const negativeKeywords = ['war', 'died', 'killed', 'disaster', 'explosion', 'attack', 'battle'];
+                let positiveEvent = data.selected ? data.selected.find(ev => !negativeKeywords.some(neg => ev.text.toLowerCase().includes(neg))) : null;
+                
+                if (positiveEvent) {
+                  historyText.innerHTML = "<strong>Year " + positiveEvent.year + ":</strong> " + positiveEvent.text;
+                  if (positiveEvent.pages && positiveEvent.pages[0] && positiveEvent.pages[0].thumbnail) {
+                    historyImg.src = positiveEvent.pages[0].thumbnail.source;
+                    historyImgBox.style.display = 'block';
+                  } else {
+                    historyImg.src = "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600";
+                    historyImgBox.style.display = 'block';
+                  }
+                }
+              } catch(e) {
+                historyText.innerText = "On this special day, great scientific & medical breakthroughs were recorded across history!";
+                historyImg.src = "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600";
+                historyImgBox.style.display = 'block';
+              }
+
+              // Cosmic astronomy fetcher with fallback guarantees
+              try {
+                spaceText.innerHTML = "🌌 <strong>Hubble Deep Field Wonder:</strong> On month " + m + ", day " + d + ", deep space telescopes captured magnificent star clusters and sparkling cosmic nebulae!";
+                spaceImg.src = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600";
+                spaceImgBox.style.display = 'block';
+              } catch (e) {
+                spaceText.innerHTML = "🪐 <strong>Deep Space Phenomenon:</strong> Space observatories tracked vibrant aurora clouds aligning across galaxies!";
+                spaceImg.src = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600";
+                spaceImgBox.style.display = 'block';
+              }
+            }
+
+            function startLifeTimer(dateStr) {
+              const birthDate = dateStr ? new Date(dateStr) : new Date('2010-10-29');
+              function updateTimer() {
+                const now = new Date();
+                let years = now.getFullYear() - birthDate.getFullYear();
+                let months = now.getMonth() - birthDate.getMonth();
+                let days = now.getDate() - birthDate.getDate();
+
+                if (days < 0) {
+                  months--;
+                  days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+                }
+                if (months < 0) {
+                  years--;
+                  months += 12;
+                }
+
+                document.getElementById('years').innerText = String(years).padStart(2, '0');
+                document.getElementById('days').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours').innerText = String(now.getHours()).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(now.getMinutes()).padStart(2, '0');
+              }
+              updateTimer();
+              setInterval(updateTimer, 60000);
+            }
+
+            function blowCandles() {
+              const candles = document.querySelectorAll('.candle');
+              candles.forEach(c => c.classList.add('blown'));
+              document.getElementById('cakeStatus').innerHTML = "✨ 🎉 Wish Granted! Now slice the birthday cake below!";
+              document.getElementById('sliceBtn').style.display = 'inline-block';
+              
+              const audio = document.getElementById('bdayAudio');
+              if (audio) audio.play().catch(e => console.log(e));
+
+              if (typeof confetti === 'function') {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.5 } });
+              }
+            }
+
+            function sliceCake() {
+              const cakeGraphic = document.getElementById('cakeGraphic');
+              cakeGraphic.classList.add('sliced');
+              cakeGraphic.innerHTML = "🍰 🎂 🍰";
+              
+              if (typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
+              }
+
+              alert("🍰 Delicious slice served! May your year ahead be as sweet as cake, Future Dr. ${name}! ❤️");
+            }
+
+            function answerQuiz(btn, isCorrect) {
+              if (isCorrect) {
+                btn.style.background = "#55efc4";
+                document.getElementById('quizResult').innerHTML = "🎉 Correct! You know Dr. ${name} so well!";
+                confetti({ particleCount: 50, spread: 60 });
+              } else {
+                btn.style.background = "#ff7675";
+              }
+            }
+
+            function downloadCertificate() {
+              html2canvas(document.getElementById('certArea')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Sister_Doctor_Certificate.png';
+                link.href = canvas.toDataURL();
+                link.click();
+              });
+            }
+
+            function toggleSurprise() {
+              const box = document.getElementById('surprise');
+              box.style.display = box.style.display === 'block' ? 'none' : 'block';
+            }
+
+            function openPhotoModal(imgSrc, memoryNum) {
+              const modal = document.getElementById('photoModal');
+              document.getElementById('modalImage').src = imgSrc;
+              document.getElementById('modalCaption').innerHTML = "✨ Memory #" + memoryNum + ": Future Dr. ${name} spreading smiles & saving lives! 🩺❤️";
+              modal.style.display = 'flex';
+            }
+
+            function closeModalDirect() {
+              document.getElementById('photoModal').style.display = 'none';
+            }
+
+            function closePhotoModal(e) {
+              if (e.target.id === 'photoModal') closeModalDirect();
+            }
+
+            function openCleanModal(imgSrc, title) {
+              const modal = document.getElementById('cleanModal');
+              document.getElementById('cleanModalImage').src = imgSrc;
+              document.getElementById('cleanModalCaption').innerHTML = title;
+              modal.style.display = 'flex';
+            }
+
+            function closeCleanModalDirect() {
+              document.getElementById('cleanModal').style.display = 'none';
+            }
+
+            function closeCleanModal(e) {
+              if (e.target.id === 'cleanModal') closeCleanModalDirect();
+            }
+          <\/script>
+        </body>
+        </html>
+      `;
+
+      newWin.document.open();
+      newWin.document.write(content);
+      newWin.document.close();
+    }
+  </script>
+</body>
+</html>
